@@ -1,0 +1,53 @@
+entity count(clk: clock, rst: bool, target: int<64>) -> bool {
+    reg(clk) count reset (rst: 0) = {
+        if count == target {
+            0
+        } else {
+            trunc(count + 1)
+        }
+    };
+    count == target
+}
+
+entity tick_s(clk: clock, rst: bool) -> bool {
+    inst count(clk, rst, 100_000_000)
+}
+
+#[no_mangle]
+entity top(
+    #[no_mangle] clk: clock,
+    #[no_mangle] ld5: inv &[bool; 3],
+    #[no_mangle] ld6: inv &[bool; 3],
+    #[no_mangle] ld7: inv &[bool; 3],
+    #[no_mangle] ld8: inv &[bool; 3],
+) {
+    reg(clk) rst initial(true) = false;
+
+    let off = [true, true, true];
+    let red = [true, true, false];
+
+    reg(clk) lit: int<4> reset(rst: 0) = {
+        let tick = inst tick_s(clk, rst);
+        if lit == 5 {
+            5
+        } else if tick {
+            trunc(lit + 1)
+        } else {
+            lit
+        }
+    };
+
+    let leds = match lit {
+        0 => (off, off, off, off),
+        1 => (red, off, off, off),
+        2 => (red, red, off, off),
+        3 => (red, red, red, off),
+        4 => (red, red, red, red),
+        _ => (off, off, off, off),
+    };
+
+    set ld5 = &leds#0;
+    set ld6 = &leds#1;
+    set ld7 = &leds#2;
+    set ld8 = &leds#3;
+}

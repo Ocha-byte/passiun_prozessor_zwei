@@ -1,0 +1,10 @@
+name = "passiun_prozessor_zwei"
+
+[synthesis]
+top = "top"
+command = "synth_ecp5"
+
+[board]
+name = "ecpix-5"
+pin_file = "ecpix5.lpf"
+config_file = "openocd-ecpix5.cfg"
